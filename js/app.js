@@ -220,7 +220,7 @@ document.getElementById("qrSearch").addEventListener("input", debounce((e) => {
 }, 250));
 
 function openQrListModal(w) {
-  const link = buildQrLink(w.warrantyId, w.customerName, w.siteAddress);
+  const link = buildQrLink(w.warrantyId);
   const wrap = document.getElementById("qrListModalCanvas");
   wrap.innerHTML = "";
   new QRCode(wrap, { text: link, width: 200, height: 200, colorDark: "#313234", colorLight: "#ffffff" });
