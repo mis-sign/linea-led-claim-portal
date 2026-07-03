@@ -54,6 +54,10 @@ function showModule(name) {
   if (name === "qr") loadQrList();
 }
 
+// Handle deep-link from a scanned QR code, e.g. index.html?warrantyId=TA4G5TJZ
+// Short links (auto-generated) only carry the Warranty ID — we fetch the
+// branch name/address from the database. Manual QR cards may also carry
+// branchName/siteAddress directly if the record isn't in the database yet.
 (async function handleDeepLink() {
   const params = new URLSearchParams(window.location.search);
   const mod = params.get("module");
@@ -62,7 +66,6 @@ function showModule(name) {
   let siteAddress = params.get("siteAddress");
 
   if (warrantyId && !branchName && !siteAddress) {
-    // Short QR link (auto-generated) — fetch branch/address from the database
     try {
       const data = await api(`/api/warranty/${encodeURIComponent(warrantyId)}`);
       branchName = data.warranty.customerName;
