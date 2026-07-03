@@ -1,0 +1,114 @@
+// whatsapp.js
+// Sends WhatsApp messages via Maytapi (https://maytapi.com) using the
+// credentials saved in the Admin Console (Module 05 → Notification Settings):
+//   - Product ID Key   -> productId
+//   - Phone Configuration ID -> phoneId
+//   - Token Secure ID  -> token (sent as the x-maytapi-key header)
+//
+// If WhatsApp notifications are disabled/not configured, sendWhatsApp()
+// skips silently and never throws — a broken WhatsApp config can't break
+// claim registration.
+
+function formatIndianNumber(number) {
+  const digits = (number || "").replace(/\D/g, "");
+  if (digits.length === 10) return "91" + digits; // assume India if no country code given
+  return digits;
+}
+
+async function sendWhatsApp(db, { toNumber, message }) {
+  const cfg = db.admin.notifications && db.admin.notifications.whatsapp;
+  if (!cfg || !cfg.enabled || !cfg.productId || !cfg.phoneId || !cfg.token) {
+    return { sent: false, reason: "WhatsApp notifications are not configured/enabled." };
+  }
+
+  const url = `https://api.maytapi.com/api/${cfg.productId}/${cfg.phoneId}/sendMessage`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-maytapi-key": cfg.token
+      },
+      body: JSON.stringify({
+        to_number: formatIndianNumber(toNumber),
+        type: "text",
+        message
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      console.error("Maytapi send failed:", data);
+      return { sent: false, reason: data.message || "Maytapi API rejected the message." };
+    }
+    return { sent: true };
+  } catch (err) {
+    console.error("WhatsApp send failed:", err.message);
+    return { sent: false, reason: err.message };
+  }
+}
+
+// ---- Templates (plain text — WhatsApp doesn't render HTML, so we build a
+// "card" look using unicode dividers, bold markers and emoji icons) ----
+
+const DIVIDER = "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬";
+
+function complaintRegisteredMessage(db, complaint) {
+  const company = db.admin.companyName;
+  return (
+    `✅ *${company}*\n${DIVIDER}\n` +
+    `*🎫 WARRANTY CLAIM REGISTERED*\n${DIVIDER}\n\n` +
+    `Hi *${complaint.contactName}*, your claim has been logged successfully. Our team will reach out shortly.\n\n` +
+    `🆔 *Claim ID:* ${complaint.id}\n` +
+    `🏢 *Branch:* ${complaint.branchName}\n` +
+    `⚡ *Fault:* ${complaint.faultType}\n` +
+    `🛡️ *Warranty:* ${complaint.warrantyStatus}\n` +
+    `📌 *Status:* ${complaint.status}\n\n` +
+    `${DIVIDER}\n` +
+    `We'll message you here as your claim progresses.\n` +
+    `📞 Support: ${db.admin.supportPhone}`
+  );
+}
+
+function statusUpdateMessage(db, complaint) {
+  const company = db.admin.companyName;
+  return (
+    `🔔 *${company}*\n${DIVIDER}\n` +
+    `*CLAIM STATUS UPDATED*\n${DIVIDER}\n\n` +
+    `Hi *${complaint.contactName}*, here's the latest on your claim.\n\n` +
+    `🆔 *Claim ID:* ${complaint.id}\n` +
+    `🏢 *Branch:* ${complaint.branchName}\n` +
+    `⚡ *Fault:* ${complaint.faultType}\n` +
+    `📌 *New Status:* ${complaint.status}\n\n` +
+    `${DIVIDER}\n` +
+    `📞 Support: ${db.admin.supportPhone}`
+  );
+}
+
+// Sent to the admin's own WhatsApp number (Notification Settings → Admin
+// WhatsApp Number) whenever a new claim comes in — separate from the
+// customer's copy so the wording/tone fits an internal alert.
+function adminNewClaimMessage(db, complaint) {
+  const company = db.admin.companyName;
+  return (
+    `📥 *${company} — New Claim Alert*\n${DIVIDER}\n\n` +
+    `A new warranty claim was just filed.\n\n` +
+    `🆔 *Claim ID:* ${complaint.id}\n` +
+    `🏢 *Branch:* ${complaint.branchName}\n` +
+    `📍 *Address:* ${complaint.siteAddress}\n` +
+    `⚡ *Fault:* ${complaint.faultType}\n` +
+    `🛡️ *Warranty:* ${complaint.warrantyStatus}\n` +
+    `👤 *Contact:* ${complaint.contactName}\n` +
+    `📱 *Number:* ${complaint.whatsappNumber}\n\n` +
+    `${DIVIDER}\n` +
+    `Open the Admin Console → Live Dashboard to update this claim.`
+  );
+}
+
+module.exports = {
+  sendWhatsApp,
+  complaintRegisteredMessage,
+  statusUpdateMessage,
+  adminNewClaimMessage,
+  formatIndianNumber
+};
