@@ -54,16 +54,23 @@ function showModule(name) {
   if (name === "qr") loadQrList();
 }
 
-// Handle deep-link from a scanned QR code, e.g.
-// index.html?module=register&warrantyId=TA4G5TJZ&branchName=Muthoot&siteAddress=...
-// When it looks like a genuine QR scan (a warrantyId or branchName is present),
-// the portal switches to KIOSK MODE — only the complaint form is shown, no nav.
-(function handleDeepLink() {
+(async function handleDeepLink() {
   const params = new URLSearchParams(window.location.search);
   const mod = params.get("module");
   const warrantyId = params.get("warrantyId");
-  const branchName = params.get("branchName");
-  const siteAddress = params.get("siteAddress");
+  let branchName = params.get("branchName");
+  let siteAddress = params.get("siteAddress");
+
+  if (warrantyId && !branchName && !siteAddress) {
+    // Short QR link (auto-generated) — fetch branch/address from the database
+    try {
+      const data = await api(`/api/warranty/${encodeURIComponent(warrantyId)}`);
+      branchName = data.warranty.customerName;
+      siteAddress = data.warranty.siteAddress;
+    } catch (err) {
+      // Warranty ID not found in database — leave blank, staff can fill manually
+    }
+  }
 
   if (warrantyId) {
     const el = document.getElementById("warrantySerial");
