@@ -116,12 +116,13 @@ if (document.body.classList.contains("kiosk-mode")) autoCaptureGps();
 
 // ================= MODULE 01: QR GENERATOR =================
 function buildQrLink(warrantyId, branchName, siteAddress) {
-  return (
-    window.location.origin + window.location.pathname +
-    `?module=register&warrantyId=${encodeURIComponent(warrantyId || "")}` +
-    `&branchName=${encodeURIComponent(branchName || "")}` +
-    `&siteAddress=${encodeURIComponent(siteAddress || "")}`
-  );
+  let url = window.location.origin + window.location.pathname +
+    `?warrantyId=${encodeURIComponent(warrantyId || "")}`;
+  // Branch/address only added for one-off manual cards not yet in the database.
+  // Auto-generated QRs (from Module 04) skip these — keeps them short & reliable.
+  if (branchName) url += `&branchName=${encodeURIComponent(branchName)}`;
+  if (siteAddress) url += `&siteAddress=${encodeURIComponent(siteAddress)}`;
+  return url;
 }
 
 document.getElementById("generateQrBtn").addEventListener("click", () => {
