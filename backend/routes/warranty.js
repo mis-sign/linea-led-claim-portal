@@ -202,5 +202,15 @@ router.post("/import", requireAdmin, upload.single("file"), (req, res) => {
     totalRows: rows.length
   });
 });
+// GET /api/warranty/:warrantyId - fetch a single record by its Warranty ID
+// (used by the complaint form to auto-fill branch/address from a short QR link)
+router.get("/:warrantyId", (req, res) => {
+  const db = readDb();
+  const record = db.warranties.find(
+    (w) => (w.warrantyId || "").toLowerCase() === req.params.warrantyId.toLowerCase()
+  );
+  if (!record) return res.status(404).json({ error: "Warranty record not found." });
+  res.json({ warranty: record });
+});
 
 module.exports = router;
