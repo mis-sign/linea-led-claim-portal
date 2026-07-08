@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowOrange" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f2790a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#f2790a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1d6fb8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#1d6fb8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowGreen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1f8348" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#1f8348" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Soft LED-glow bokeh orbs -->
+  <circle cx="980" cy="90" r="260" fill="url(#glowOrange)"/>
+  <circle cx="120" cy="60" r="200" fill="url(#glowBlue)"/>
+  <circle cx="620" cy="440" r="220" fill="url(#glowGreen)"/>
+  <circle cx="1100" cy="420" r="150" fill="url(#glowOrange)"/>
+
+  <!-- Water-drop ripple rings -->
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.06">
+    <circle cx="940" cy="120" r="60"/>
+    <circle cx="940" cy="120" r="95"/>
+    <circle cx="940" cy="120" r="130"/>
+    <circle cx="940" cy="120" r="165"/>
+  </g>
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.05">
+    <circle cx="180" cy="380" r="45"/>
+    <circle cx="180" cy="380" r="75"/>
+    <circle cx="180" cy="380" r="105"/>
+  </g>
+  <g fill="none" stroke="#f2790a" stroke-opacity="0.12">
+    <circle cx="1080" cy="380" r="30"/>
+    <circle cx="1080" cy="380" r="52"/>
+  </g>
+
+  <!-- Faint circuit-style connecting lines, echoing the LED signage theme -->
+  <g stroke="#ffffff" stroke-opacity="0.045" stroke-width="1.5">
+    <path d="M0 250 H200 L240 210 H420"/>
+    <path d="M1200 300 H1000 L960 340 H760"/>
+    <path d="M600 0 V90 L640 130 V260"/>
+  </g>
+</svg>
